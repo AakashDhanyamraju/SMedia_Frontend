@@ -3,8 +3,8 @@ import Cookies from "js-cookie";
 import React, { useEffect, useRef, useState } from "react";
 import useDecodedToken from "../utils/utility";
 import { toast } from "react-toastify";
-import { io } from 'socket.io-client'
-import { format } from 'date-fns'
+import { io } from "socket.io-client";
+import { format } from "date-fns";
 
 // import ''
 
@@ -14,14 +14,14 @@ const ChatSection = () => {
   const [content, setContent] = useState("");
   const [messages, setMessages] = useState([]);
   const [senderData, setSenderData] = useState([]);
-  const [receiverData, setReceiverData] = useState([])
-  const [arrivingMessage, setArrivingMessage] = useState(null)
-  const inputRef = useRef()
-  
-  console.log('arriving message',arrivingMessage)
-  console.log("receiverData",receiverData)
+  const [receiverData, setReceiverData] = useState([]);
+  const [arrivingMessage, setArrivingMessage] = useState(null);
+  const inputRef = useRef();
+
+  console.log("arriving message", arrivingMessage);
+  console.log("receiverData", receiverData);
   // const [socket, setSocket] = useState(null)
-  const socket = useRef()
+  const socket = useRef();
 
   console.log(messages);
   const token = Cookies.get("currentUser");
@@ -42,13 +42,16 @@ const ChatSection = () => {
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
     }
   };
   // useEffect(() => {
   //   setTimeout(() => scrollRef.current.scrollIntoView({ behavior: 'smooth' }), 1000);
   // },[content]);
-  
+
   // console.log(decodedToken)
   // const decodedToken = useDecodedToken(token)
   // console.log('messages', messages);
@@ -74,41 +77,54 @@ const ChatSection = () => {
 
   // },[])
 
+  // const date = new Date(dateString);
+
+  const formattedDate = (dateString) => {
+    const date = new Date(dateString);
+    date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+  // const formattedTime = date.toLocaleTimeString("en-US", {
+  //   hour: "numeric",
+  //   minute: "numeric",
+  //   second: "numeric",
+  // });
+
   useEffect(() => {
-    const setArriveMessages =() =>{
-      socket.current = io('ws://localhost:8900')
-      socket.current.on('getMessage', data => {
-      console.log('data', data)
-      setArrivingMessage({
-        sender: data.senderId,
-        content: data.text,
-        timestamp: Date.now()
-      })
-    })
-    }
-    setArriveMessages()
-    
-  }, [])
+    const setArriveMessages = () => {
+      socket.current = io("ws://localhost:8900");
+      socket.current.on("getMessage", (data) => {
+        console.log("data", data);
+        setArrivingMessage({
+          sender: data.senderId,
+          content: data.text,
+          timestamp: Date.now(),
+        });
+      });
+    };
+    setArriveMessages();
+  }, []);
 
   useEffect(() => {
     const messagesArrive = () => {
-      arrivingMessage && receiverData._id === arrivingMessage.sender &&
-      setMessages( prev => [...prev, arrivingMessage])
-
-    }
-    messagesArrive()
-    
-  },[arrivingMessage])
+      arrivingMessage &&
+        receiverData._id === arrivingMessage.sender &&
+        setMessages((prev) => [...prev, arrivingMessage]);
+    };
+    messagesArrive();
+  }, [arrivingMessage]);
 
   useEffect(() => {
-    { id && socket.current.emit('addUser',id)}
-    socket.current.on('getUsers', users => {
-      console.log("users",users)
-    })
-  },[id])
-
-  
-  
+    {
+      id && socket.current.emit("addUser", id);
+    }
+    socket.current.on("getUsers", (users) => {
+      console.log("users", users);
+    });
+  }, [id]);
 
   // useEffect(() => {
   //   socket?.on("welcome", message => {
@@ -119,9 +135,9 @@ const ChatSection = () => {
   //   const handleWelcomeMessage = (message) => {
   //     console.log(message);
   //   };
-  
+
   //   {socket && socket.on("welcome", handleWelcomeMessage);}
-  
+
   //   // Cleanup function
   //   return () => {
   //     {socket && socket.off("welcome", handleWelcomeMessage);}
@@ -129,11 +145,14 @@ const ChatSection = () => {
   // }, [socket]);
 
   const handleCreateMessage = async (e) => {
-
-    console.log('sendMessaeg', {senderId: id, receiverId: receiverData._id, text: content})
+    console.log("sendMessaeg", {
+      senderId: id,
+      receiverId: receiverData._id,
+      text: content,
+    });
     // e.preventDefault();
     const sender = id;
-    
+
     // socket.current.emit('sendMessage', {
     //   senderId: id,
     //   receiverId: receiverData._id,
@@ -141,10 +160,10 @@ const ChatSection = () => {
     // })
 
     try {
-      inputRef.current.value = '';
+      inputRef.current.value = "";
 
       inputRef.current.focus();
-      
+
       if (!conversationId) {
         return toast.error("no conversation Id");
       }
@@ -154,11 +173,11 @@ const ChatSection = () => {
       if (!content) {
         return toast.warning("Message cannot be blank");
       }
-      socket.current.emit('sendMessage', {
+      socket.current.emit("sendMessage", {
         senderId: id,
         receiverId: receiverData._id,
-        text: content
-      })
+        text: content,
+      });
       const response = await axios.post(
         "http://localhost:9000/messages",
         {
@@ -172,22 +191,16 @@ const ChatSection = () => {
           },
         }
       );
-
       // setContent(null);
-
       // Focus the input
-      
-      
-
       console.log(response.data);
       // Handle success
     } catch (error) {
-      toast.error(error.response.data.error)
+      toast.error(error.response.data.error);
       console.error(error);
       // Handle error
     }
   };
-
 
   // const handleKeyDown = (event) => {
   //   if (event.key === 'Enter') {
@@ -195,32 +208,30 @@ const ChatSection = () => {
   //     // fetchMessages(conversationId)
   //   }
   // };
-  
-//  conversationId && useEffect(async () => {
-//     const fetchMessages = async (conversationId) => {
 
-//     try {
-//       const response = await axios.get(
-//         `http://localhost:9000/messages/${conversationId}`,
-//         {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//           },
-//         }
-//       );
-//       // console.log(response.data);
-//       setConversationId(conversationId);
-//       setMessages(response.data);
-//     } catch (err) {
-//       console.log(err);
-//       toast.error(err.response.data.error);
-//     }}
-    
-//     fetchMessages(conversationId)
-  
-  
+  //  conversationId && useEffect(async () => {
+  //     const fetchMessages = async (conversationId) => {
 
-// },[conversationId])
+  //     try {
+  //       const response = await axios.get(
+  //         `http://localhost:9000/messages/${conversationId}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
+  //       // console.log(response.data);
+  //       setConversationId(conversationId);
+  //       setMessages(response.data);
+  //     } catch (err) {
+  //       console.log(err);
+  //       toast.error(err.response.data.error);
+  //     }}
+
+  //     fetchMessages(conversationId)
+
+  // },[conversationId])
   const fetchMessages = async (conversationId) => {
     try {
       const response = await axios.get(
@@ -303,12 +314,11 @@ const ChatSection = () => {
                             {conversations.map((conversation, index) => (
                               <li key={index} className="p-2 border-bottom">
                                 <a
-                                  onClick={() =>{
+                                  onClick={() => {
                                     // setConversationId(conversation._id)
-                                    setReceiverData(conversation.userData)
-                                    fetchMessages(conversation._id)
-                                  }
-                                  }
+                                    setReceiverData(conversation.userData);
+                                    fetchMessages(conversation._id);
+                                  }}
                                   className="d-flex justify-content-between"
                                 >
                                   <div className="d-flex flex-row">
@@ -355,10 +365,10 @@ const ChatSection = () => {
                         </div>
                       </div>
                     </div>
-                   { conversationId && 
-                    <div className="col-md-6 col-lg-7 col-xl-8">
-                      {/* this is chats */}
-                      
+                    {conversationId && (
+                      <div className="col-md-6 col-lg-7 col-xl-8">
+                        {/* this is chats */}
+
                         <div
                           className="pt-3 pe-3"
                           data-mdb-perfect-scrollbar="true"
@@ -390,11 +400,14 @@ const ChatSection = () => {
                                   <img
                                     className="rounded-circle object-fit-contain border border-1"
                                     // src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
-                                    src={message.senderData.avatar ? message.senderData.avatar : 'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg' }
-
+                                    src={
+                                      message.senderData.avatar
+                                        ? message.senderData.avatar
+                                        : "https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg"
+                                    }
                                     alt="avatar 1"
-                                    width='45px'
-                                    height='45px'
+                                    width="45px"
+                                    height="45px"
                                     // style={{ width: "45px", height: "100%" }}
                                   />
                                 </div>
@@ -402,11 +415,15 @@ const ChatSection = () => {
                                 <div className="d-flex flex-row justify-content-start">
                                   <img
                                     className="rounded-circle object-fit-contain border border-1"
-                                    src={receiverData.avatar ? receiverData.avatar : 'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg' }
+                                    src={
+                                      receiverData.avatar
+                                        ? receiverData.avatar
+                                        : "https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg"
+                                    }
                                     // "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp"
                                     alt="avatar 1"
-                                    width='45px'
-                                    height='45px'
+                                    width="45px"
+                                    height="45px"
                                     // style={{ width: "45px", height: "100%" }}
                                   />
                                   <div>
@@ -422,7 +439,8 @@ const ChatSection = () => {
                                     </p>
                                     <p className="small ms-3 mb-3 rounded-3 text-muted float-end">
                                       {/* 12:00 PM | Aug 13 */}
-                                      {message.timestamp}
+                                      {/* {message.timestamp} */}
+                                      {formattedDate(message.timestamp)}
                                     </p>
                                   </div>
                                 </div>
@@ -432,10 +450,9 @@ const ChatSection = () => {
 
                           {/* outgoing chat */}
                         </div>
-                      
 
-                      {/* this is input */}
-                      
+                        {/* this is input */}
+
                         <div className="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
                           {/* <img
                             src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp"
@@ -451,29 +468,26 @@ const ChatSection = () => {
                             // onKeyDown={handleKeyDown}
                             onChange={(e) => setContent(e.target.value)}
                             ref={inputRef}
-
                           />
-                          <a
-                            
-                            className="ms-1 text-muted"
-                            href="#!"
-                          >
+                          <a className="ms-1 text-muted" href="#!">
                             <i className="fas fa-paperclip"></i>
                           </a>
                           <a className="ms-3 text-muted" href="#!">
                             <i className="fas fa-smile"></i>
                           </a>
-                          <a onClick={(e) => {
-                            
-                            handleCreateMessage(e)
-                            fetchMessages(conversationId)
-                          }} 
-                            className="ms-3" href="#!">
+                          <a
+                            onClick={(e) => {
+                              handleCreateMessage(e);
+                              fetchMessages(conversationId);
+                            }}
+                            className="ms-3"
+                            href="#!"
+                          >
                             <i className="fas fa-paper-plane"></i>
                           </a>
                         </div>
-                     
-                    </div>}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

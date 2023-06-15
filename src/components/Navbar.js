@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 import useDecodedToken from "../utils/utility";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { GiAbstract006 } from "react-icons/gi";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -19,30 +20,29 @@ const Navbar = () => {
     // Remove the 'currentUser' cookie
     try {
       // Make a POST request to the register endpoint
-      const response = await axios.put(`http://localhost:9000/users/${id}`, {
-        status: 'inactive'
-      },
-      {
-        headers: {
-            'Authorization': `Bearer ${token}`
-          }
-    });
+      const response = await axios.put(
+        `http://localhost:9000/users/${id}`,
+        {
+          status: "inactive",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       // Display success message
-      toast.success('Logout Successfull')
-      
-      Cookies.remove('currentUser');
-  
+      toast.success("Logout Successfull");
+
+      Cookies.remove("currentUser");
 
       navigate("/login");
-
-
     } catch (error) {
-        console.log(error)
+      console.log(error);
 
-        // Handle registration errors
-         toast.error(`Logout failed due to this error: ${error}`);
+      // Handle registration errors
+      toast.error(`Logout failed due to this error: ${error}`);
     }
-    
   };
   return (
     // <nav className="navbar navbar-expand-lg navbar-light bg-light">
@@ -92,52 +92,57 @@ const Navbar = () => {
         </button>
         <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
           <a class="navbar-brand" href="/">
+            <GiAbstract006 className="mx-1" />
             Smedia
           </a>
-          {token && <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <Link class="nav-link" to="/newpost">
-                Create a post
-              </Link>
-            </li>
-            <li class="nav-item">
-              <Link class="nav-link" aria-current="page" to="/friends">
-                Friends
-              </Link>
-            </li>
-            {/* <li class="nav-item">
+          {token && (
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <Link class="nav-link" to="/newpost">
+                  Create a post
+                </Link>
+              </li>
+              <li class="nav-item">
+                <Link class="nav-link" aria-current="page" to="/friends">
+                  Friends
+                </Link>
+              </li>
+              {/* <li class="nav-item">
           <Link class="nav-link" to="/profile"></Link>
         </li> */}
 
-            <li className="nav-item">
-              {/* <a href></a> */}
+              <li className="nav-item">
+                {/* <a href></a> */}
 
-              <Link className="nav-link" to={`/profile/${id}`}>
-                {userInfo.username}
-              </Link>
-            </li>
+                <Link className="nav-link" to={`/profile/${id}`}>
+                  {userInfo.username}
+                </Link>
+              </li>
 
-            <li className="nav-item">
-              {/* <a href></a> */}
+              <li className="nav-item">
+                {/* <a href></a> */}
 
-              <Link className="nav-link" to='/chatroom'>
-                Chat
-              </Link>
-            </li>
-            {/* <li class="nav-item">
+                <Link className="nav-link" to="/chatroom">
+                  Chat
+                </Link>
+              </li>
+              {/* <li class="nav-item">
           <Link class="nav-link disabled">Disabled</Link>
         </li> */}
-          </ul>}
+            </ul>
+          )}
 
-          {token && <div className="d-flex">
-            <button
-              onClick={()=> handleLogout(id)}
-              type="button"
-              class="btn btn-outline-danger"
-            >
-              <a>Logout</a>
-            </button>
-          </div>}
+          {token && (
+            <div className="d-flex">
+              <button
+                onClick={() => handleLogout(id)}
+                type="button"
+                class="btn btn-outline-danger"
+              >
+                <a>Logout</a>
+              </button>
+            </div>
+          )}
 
           {/* <form class="d-flex" role="search">
         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
