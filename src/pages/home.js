@@ -10,9 +10,47 @@ import { toast } from "react-toastify";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
-
   const [message, setMessage] = useState("");
+
+  const [comments, setComments] = useState([]);
+  // const [postId, setPostId] = useState("");
+  console.log(comments);
+  const [submittedComment, setSubmittedComment] = useState("");
+  console.log("submitted Comment", submittedComment);
+
   const token = Cookies.get("currentUser");
+  const decoded = useDecodedToken(token);
+  const userInfo = { ...decoded };
+
+  const handleChange = (event) => {
+    setSubmittedComment(event.target.value);
+  };
+
+  const handleSubmit = async (postId) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:9000/comments/",
+        {
+          user: userInfo.id,
+          post: postId,
+          content: submittedComment,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const fetchedComment = response.data;
+      toast.success("Comment added");
+      // setComments(fetchedComments);
+      console.log(response);
+    } catch (error) {
+      toast.error("failed to add comment");
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -34,6 +72,27 @@ const Home = () => {
 
     fetchPosts();
   }, []);
+
+  // useEffect(() => {
+  const fetchComments = async (postId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:9000/comments/${postId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const fetchedComments = response.data;
+      setComments(fetchedComments);
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // }, [postId]);
 
   const postLikes = async (id) => {
     try {
@@ -128,7 +187,28 @@ const Home = () => {
                     user={post.username}
                     postId={post._id}
                     increaselikes={() => postLikes(post._id)}
+                    comments={post.comments}
                   />
+                  {/* <form onSubmit={() => handleSubmit(post._id)}> */}
+                  {/* <button onClick={() => fetchComments(post._id)}>
+                    Comments
+                  </button> */}
+                  {/* {comments.map((comment, index) => (
+                    <div key={index}>{comment.content}</div>
+                  ))} */}
+
+                  {/* <label>
+                    Comment:
+                    <input
+                      type="text"
+                      value={submittedComment}
+                      onChange={handleChange}
+                    />
+                  </label>
+                  <button onClick={() => handleSubmit(post._id)} type="button">
+                    Submit
+                  </button> */}
+                  {/* </form> */}
                 </div>
                 // <div key={post.id}>{post.title}</div>
               ))}
